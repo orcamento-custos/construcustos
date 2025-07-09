@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Construcustos - Simulador de Orçamento</title>
+</head>
+<body>
+  <h1>Construcustos</h1>
+  <p>Bem-vindo ao simulador de orçamento de obras.</p>
+
+  <form>
+    <label for="metros">Informe a metragem da obra (m²):</label><br>
+    <input type="number" id="metros" name="metros" placeholder="Ex: 100"><br><br>
+
+    <button type="button" onclick="calcular()">Calcular Orçamento</button>
+  </form>
+
+  <div id="resultado" style="margin-top:20px;"></div>
+
+  <script>
+    function calcular() {
+      const metroQuadrado = 3200; // valor base configurável
+      const metros = parseFloat(document.getElementById("metros").value);
+
+      if (isNaN(metros) || metros <= 0) {
+        document.getElementById("resultado").innerHTML = "Informe uma metragem válida.";
+        return;
+      }
+
+      const total = metroQuadrado * metros;
+      document.getElementById("resultado").innerHTML = 
+        `<strong>Valor estimado:</strong> R$ ${total.toLocaleString("pt-BR")}`;
+    }
+  </script>
+</body>
+</html>
