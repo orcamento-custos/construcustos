@@ -1,0 +1,18 @@
+let valorAtual = 3200;
+
+export default function handler(req, res) {
+  if (req.method === 'GET') {
+    return res.status(200).json({ valor: valorAtual });
+  }
+
+  if (req.method === 'POST') {
+    const { valor } = req.body;
+    if (typeof valor === 'number' && valor > 0) {
+      valorAtual = valor;
+      return res.status(200).json({ mensagem: 'Valor atualizado com sucesso!' });
+    }
+    return res.status(400).json({ mensagem: 'Valor inválido' });
+  }
+
+  return res.status(405).end();
+}
