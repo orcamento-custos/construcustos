@@ -1,39 +1,47 @@
-import { useState, useEffect } from 'react';
+// pages/admin.js
+import { useState } from "react";
 
-export default function Admin() {
-  const [valor, setValor] = useState('');
-  const [mensagem, setMensagem] = useState('');
+export default function AdminPage() {
+  const [senha, setSenha] = useState("");
+  const [valorM2, setValorM2] = useState("");
+  const [msg, setMsg] = useState("");
 
-  useEffect(() => {
-    fetch('/api/valor-m2')
-      .then(res => res.json())
-      .then(data => setValor(data.valor || ''));
-  }, []);
+  const salvarValor = () => {
+    if (senha !== "rock2025") {
+      setMsg("Senha incorreta!");
+      return;
+    }
 
-  const salvar = async () => {
-    const response = await fetch('/api/valor-m2', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ valor: parseFloat(valor) })
-    });
-
-    const data = await response.json();
-    setMensagem(data.mensagem);
+    fetch("/api/valor", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ valor: parseFloat(valorM2) }),
+    })
+      .then((res) => res.json())
+      .then(() => setMsg("Valor atualizado com sucesso!"))
+      .catch(() => setMsg("Erro ao salvar."));
   };
 
   return (
-    <div style={{ padding: 40 }}>
-      <h1>Painel Administrativo</h1>
-      <p>Atualize o valor do metro quadrado (m²):</p>
+    <div style={{ padding: "20px", fontFamily: "Arial" }}>
+      <h2>Área Administrativa</h2>
+      <p>Digite a senha e o novo valor do m²:</p>
+      <input
+        type="password"
+        placeholder="Senha"
+        value={senha}
+        onChange={(e) => setSenha(e.target.value)}
+        style={{ marginBottom: "10px", display: "block" }}
+      />
       <input
         type="number"
-        value={valor}
-        onChange={(e) => setValor(e.target.value)}
-        style={{ padding: 8 }}
+        placeholder="Novo valor do m²"
+        value={valorM2}
+        onChange={(e) => setValorM2(e.target.value)}
+        style={{ marginBottom: "10px", display: "block" }}
       />
-      <br /><br />
-      <button onClick={salvar} style={{ padding: 10 }}>Salvar</button>
-      {mensagem && <p style={{ marginTop: 20 }}>{mensagem}</p>}
+      <button onClick={salvarValor}>Salvar</button>
+      <p>{msg}</p>
     </div>
   );
 }
