@@ -8,7 +8,7 @@ export default function Admin() {
   const [currentValue, setCurrentValue] = useState('R$ 1.500');
 
   const handleLogin = () => {
-    if (username === 'admin' && password === '1234') {
+    if (username === 'admin' && password === 'St@fe2017') {
       setLoggedIn(true);
     } else {
       alert('Usuário ou senha inválidos');
