@@ -1,47 +1,58 @@
-// pages/admin.js
-import { useState } from "react";
+import { useState } from 'react';
 
-export default function AdminPage() {
-  const [senha, setSenha] = useState("");
-  const [valorM2, setValorM2] = useState("");
-  const [msg, setMsg] = useState("");
+export default function Admin() {
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
+  const [newValue, setNewValue] = useState('');
+  const [currentValue, setCurrentValue] = useState('R$ 1.500');
 
-  const salvarValor = () => {
-    if (senha !== "rock2025") {
-      setMsg("Senha incorreta!");
-      return;
+  const handleLogin = () => {
+    if (username === 'admin' && password === '1234') {
+      setLoggedIn(true);
+    } else {
+      alert('Usuário ou senha inválidos');
     }
-
-    fetch("/api/valor", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ valor: parseFloat(valorM2) }),
-    })
-      .then((res) => res.json())
-      .then(() => setMsg("Valor atualizado com sucesso!"))
-      .catch(() => setMsg("Erro ao salvar."));
   };
 
+  const handleUpdate = () => {
+    setCurrentValue(newValue);
+    alert(`Valor do m² atualizado para: ${newValue}`);
+    setNewValue('');
+  };
+
+  if (!loggedIn) {
+    return (
+      <div style={{ padding: 20 }}>
+        <h2>Login de administrador</h2>
+        <input
+          type="text"
+          placeholder="Usuário"
+          value={username}
+          onChange={(e) => setUsername(e.target.value)}
+        /><br />
+        <input
+          type="password"
+          placeholder="Senha"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        /><br />
+        <button onClick={handleLogin}>Entrar</button>
+      </div>
+    );
+  }
+
   return (
-    <div style={{ padding: "20px", fontFamily: "Arial" }}>
-      <h2>Área Administrativa</h2>
-      <p>Digite a senha e o novo valor do m²:</p>
+    <div style={{ padding: 20 }}>
+      <h2>Painel de Admin</h2>
+      <p>Valor atual do m²: <strong>{currentValue}</strong></p>
       <input
-        type="password"
-        placeholder="Senha"
-        value={senha}
-        onChange={(e) => setSenha(e.target.value)}
-        style={{ marginBottom: "10px", display: "block" }}
-      />
-      <input
-        type="number"
+        type="text"
         placeholder="Novo valor do m²"
-        value={valorM2}
-        onChange={(e) => setValorM2(e.target.value)}
-        style={{ marginBottom: "10px", display: "block" }}
-      />
-      <button onClick={salvarValor}>Salvar</button>
-      <p>{msg}</p>
+        value={newValue}
+        onChange={(e) => setNewValue(e.target.value)}
+      /><br />
+      <button onClick={handleUpdate}>Atualizar</button>
     </div>
   );
 }
