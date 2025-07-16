@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react';
+import { supabase } from '../supabaseClient';
 
 export default function Home() {
+  const [valorM2, setValorM2] = useState(null);
   const [respostas, setRespostas] = useState({
     area: '',
     bloco: '',
@@ -16,100 +18,86 @@ export default function Home() {
     areaCobertura: '',
     fundacao: '',
     desperdicio: '',
-    margem: ''
+    margemLucro: '',
   });
 
-  const [custoM2, setCustoM2] = useState(3200); // valor inicial padrão
-  const [resultado, setResultado] = useState(null);
-
+  // Carregar o valor do m² do Supabase
   useEffect(() => {
-    fetch('/api/valor-m2')
-      .then(res => res.json())
-      .then(data => {
-        if (data.valor) setCustoM2(data.valor);
-      });
-  }, []);
+    async function buscarValorM2() {
+      const { data, error } = await supabase
+        .from('valor_m2')
+        .select('valor')
+        .order('id', { ascending: false }) // pega o mais recente
+        .limit(1);
 
-  const handleChange = (e) => {
-    setRespostas({ ...respostas, [e.target.name]: e.target.value });
-  };
-
-  const calcular = () => {
-    const area = parseFloat(respostas.area);
-    if (!area || area <= 0) {
-      setResultado('Informe uma metragem válida.');
-      return;
+      if (error) {
+        console.error('Erro ao buscar valor do m²:', error);
+      } else if (data.length > 0) {
+        setValorM2(data[0].valor);
+      }
     }
 
-    const total = area * custoM2;
-    setResultado(`Valor estimado: R$ ${total.toLocaleString('pt-BR')}`);
-  };
+    buscarValorM2();
+  }, []);
 
   return (
-    <div style={{ padding: 40 }}>
-      <h1>Construcustos</h1>
-      <p>Simulador de orçamento de obra</p>
-      <p><strong>Valor atual do m²: R$ {custoM2.toLocaleString('pt-BR')}</strong></p>
+    <div>
+      <h1>Simulador de Orçamento</h1>
 
+      {/* Exibir valor do m² */}
+      {valorM2 !== null && (
+        <p style={{ fontWeight: 'bold', fontSize: '18px', marginBottom: '20px' }}>
+          Valor atual do metro quadrado: R$ {valorM2.toFixed(2).replace('.', ',')}
+        </p>
+      )}
+
+      {/* Aqui continuam seus campos do formulário */}
       <form>
-        <label>1. Área total da construção (m²):</label><br />
-        <input type="number" name="area" value={respostas.area} onChange={handleChange} /><br /><br />
-        <label>2. Tipo de bloco:</label><br />
-        <input type="text" name="bloco" value={respostas.bloco} onChange={handleChange} /><br /><br />
-        <label>3. Padrão de acabamento:</label><br />
-        <select name="acabamento" value={respostas.acabamento} onChange={handleChange}>
-          <option value="">Selecione</option>
-          <option value="economico">Econômico</option>
-          <option value="medio">Médio</option>
-          <option value="alto">Alto</option>
-        </select><br /><br />
-        <label>4. Acabamento de paredes:</label><br />
-        <select name="pintura" value={respostas.pintura} onChange={handleChange}>
-          <option value="">Selecione</option>
-          <option value="completo">Chapisco, Emboço e Reboco</option>
-          <option value="pintura">Apenas Pintura</option>
-        </select><br /><br />
-        <label>5. Área de esquadrias (m²):</label><br />
-        <input type="number" name="esquadrias" value={respostas.esquadrias} onChange={handleChange} /><br /><br />
-        <label>6. Quantidade de banheiros:</label><br />
-        <input type="number" name="banheiros" value={respostas.banheiros} onChange={handleChange} /><br /><br />
-        <label>7. Piso cerâmico (m²):</label><br />
-        <input type="number" name="piso" value={respostas.piso} onChange={handleChange} /><br /><br />
-        <label>8. Forro (m²):</label><br />
-        <input type="number" name="forro" value={respostas.forro} onChange={handleChange} /><br /><br />
-        <label>9. Instalação hidráulica?</label><br />
-        <select name="hidraulica" value={respostas.hidraulica} onChange={handleChange}>
-          <option value="">Selecione</option>
-          <option value="sim">Sim</option>
-          <option value="nao">Não</option>
-        </select><br /><br />
-        <label>10. Instalação elétrica?</label><br />
-        <select name="eletrica" value={respostas.eletrica} onChange={handleChange}>
-          <option value="">Selecione</option>
-          <option value="sim">Sim</option>
-          <option value="nao">Não</option>
-        </select><br /><br />
-        <label>11. Tipo de cobertura:</label><br />
-        <input type="text" name="cobertura" value={respostas.cobertura} onChange={handleChange} /><br /><br />
-        <label>12. Área da cobertura (m²):</label><br />
-        <input type="number" name="areaCobertura" value={respostas.areaCobertura} onChange={handleChange} /><br /><br />
-        <label>13. Fundação hélice contínua?</label><br />
-        <select name="fundacao" value={respostas.fundacao} onChange={handleChange}>
-          <option value="">Selecione</option>
-          <option value="sim">Sim</option>
-          <option value="nao">Não</option>
-        </select><br /><br />
-        <label>14. Desperdício (%):</label><br />
-        <input type="number" name="desperdicio" value={respostas.desperdicio} onChange={handleChange} /><br /><br />
-        <label>15. Margem e custos indiretos (%):</label><br />
-        <input type="number" name="margem" value={respostas.margem} onChange={handleChange} /><br /><br />
+        <label>Área total da construção (m²):</label>
+        <input type="number" value={respostas.area} onChange={e => setRespostas({ ...respostas, area: e.target.value })} />
 
-        <button type="button" onClick={calcular}>Calcular</button>
+        <label>Tipo de bloco:</label>
+        <input type="text" value={respostas.bloco} onChange={e => setRespostas({ ...respostas, bloco: e.target.value })} />
+
+        <label>Padrão de acabamento:</label>
+        <input type="text" value={respostas.acabamento} onChange={e => setRespostas({ ...respostas, acabamento: e.target.value })} />
+
+        <label>Pintura (chapisco, reboco etc.):</label>
+        <input type="text" value={respostas.pintura} onChange={e => setRespostas({ ...respostas, pintura: e.target.value })} />
+
+        <label>Área de esquadrias (portas e janelas, m²):</label>
+        <input type="text" value={respostas.esquadrias} onChange={e => setRespostas({ ...respostas, esquadrias: e.target.value })} />
+
+        <label>Quantidade de banheiros:</label>
+        <input type="number" value={respostas.banheiros} onChange={e => setRespostas({ ...respostas, banheiros: e.target.value })} />
+
+        <label>Área de piso cerâmico (m²):</label>
+        <input type="text" value={respostas.piso} onChange={e => setRespostas({ ...respostas, piso: e.target.value })} />
+
+        <label>Área de forro (gesso ou PVC, m²):</label>
+        <input type="text" value={respostas.forro} onChange={e => setRespostas({ ...respostas, forro: e.target.value })} />
+
+        <label>Incluir instalação hidráulica?</label>
+        <input type="text" value={respostas.hidraulica} onChange={e => setRespostas({ ...respostas, hidraulica: e.target.value })} />
+
+        <label>Incluir instalação elétrica?</label>
+        <input type="text" value={respostas.eletrica} onChange={e => setRespostas({ ...respostas, eletrica: e.target.value })} />
+
+        <label>Tipo de cobertura:</label>
+        <input type="text" value={respostas.cobertura} onChange={e => setRespostas({ ...respostas, cobertura: e.target.value })} />
+
+        <label>Área da cobertura (m²):</label>
+        <input type="text" value={respostas.areaCobertura} onChange={e => setRespostas({ ...respostas, areaCobertura: e.target.value })} />
+
+        <label>Incluir fundação padrão (hélice contínua)?</label>
+        <input type="text" value={respostas.fundacao} onChange={e => setRespostas({ ...respostas, fundacao: e.target.value })} />
+
+        <label>Percentual de desperdício previsto (%):</label>
+        <input type="text" value={respostas.desperdicio} onChange={e => setRespostas({ ...respostas, desperdicio: e.target.value })} />
+
+        <label>Margem de lucro e custos indiretos (%):</label>
+        <input type="text" value={respostas.margemLucro} onChange={e => setRespostas({ ...respostas, margemLucro: e.target.value })} />
       </form>
-
-      <div style={{ marginTop: 30 }}>
-        {resultado && <strong>{resultado}</strong>}
-      </div>
     </div>
   );
 }
