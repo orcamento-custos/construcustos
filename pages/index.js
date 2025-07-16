@@ -27,7 +27,7 @@ export default function Home() {
       const { data, error } = await supabase
         .from('valor_m2')
         .select('valor')
-        .order('id', { ascending: false }) // pega o mais recente
+        .order('created_at', { ascending: false }) // ordenar pela data mais recente
         .limit(1);
 
       if (error) {
@@ -41,17 +41,19 @@ export default function Home() {
   }, []);
 
   return (
-    <div>
+    <div style={{ padding: '2rem' }}>
       <h1>Simulador de Orçamento</h1>
 
       {/* Exibir valor do m² */}
-      {valorM2 !== null && (
+      {valorM2 !== null ? (
         <p style={{ fontWeight: 'bold', fontSize: '18px', marginBottom: '20px' }}>
           Valor atual do metro quadrado: R$ {valorM2.toFixed(2).replace('.', ',')}
         </p>
+      ) : (
+        <p>Carregando valor do metro quadrado...</p>
       )}
 
-      {/* Aqui continuam seus campos do formulário */}
+      {/* Formulário com as 15 perguntas */}
       <form>
         <label>Área total da construção (m²):</label>
         <input type="number" value={respostas.area} onChange={e => setRespostas({ ...respostas, area: e.target.value })} />
